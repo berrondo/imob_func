@@ -1,6 +1,10 @@
 from pyrsistent import m
 
 
+def criar_jogador(estrategia, saldo):
+    return m(estrategia=estrategia, saldo=saldo)
+
+
 def eh_saldo_suficiente(self, valor):
     return self.saldo >= valor
 
@@ -11,7 +15,3 @@ def debitar(self, valor):
 
 def creditar(self, valor):
     return self.set('saldo', self.saldo + valor)
-
-
-def criar_jogador(estrategia, saldo):
-    return m(estrategia=estrategia, saldo=saldo)

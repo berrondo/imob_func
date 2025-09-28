@@ -15,7 +15,3 @@ def cauteloso(j, p):
 
 def aleatorio(j, p):
     return random.choice([True, False])
-
-
-def mandar_comprar(j, p):
-    return j.estrategia(j, p)
