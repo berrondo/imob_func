@@ -1,11 +1,9 @@
 import pytest
 
+from src.estrategia import aleatorio, cauteloso, exigente, impulsivo
 from src.jogador import criar_jogador
-from src.estrategia import impulsivo, exigente, cauteloso, aleatorio
-from src.propriedade import criar_propriedade
 from src.negocio import comprar_ou_alugar
-import random
-
+from src.propriedade import criar_propriedade
 
 DEZ = 10
 CEM = 100
@@ -16,7 +14,7 @@ CEM = 100
 @pytest.mark.parametrize(
     "preco,comprou",
     [
-        (99, True),      # ompra quando saldo suficiente
+        (99, True),      # compra quando saldo suficiente
         (100, True),     # compra mesmo gastando todo o saldo
         (101, False),    # não compra quando preço maior que saldo
     ]
@@ -33,7 +31,7 @@ def test_impulsivo_compra_se_tem_saldo(preco, comprou):
         assert j2.saldo == CEM - preco
         assert p2.proprietario == j2
     else:
-        assert j2.saldo == CEM 
+        assert j2.saldo == CEM
         assert p2.proprietario is None
 
 # exigente
@@ -46,9 +44,7 @@ def test_impulsivo_compra_se_tem_saldo(preco, comprou):
         (101, False),    # não compra quando não tem saldo suficiente
     ]
 )
-def test_exigente_compra_se_tem_saldo_e_aluguel_maior_que_50(
-        preco, comprou
-    ):
+def test_exigente_compra_se_tem_saldo_e_aluguel_maior_que_50(preco, comprou):
     j1 = criar_jogador(estrategia=exigente, saldo=CEM)
     p1 = criar_propriedade(preco=preco, aluguel=51)
 
@@ -69,7 +65,7 @@ def test_exigente_compra_se_tem_saldo_e_aluguel_maior_que_50(
     "preco,comprou",
     [
         (19, True),    # compra quando sobra > 80
-        (20, True),    # compra deixando exatos 80 
+        (20, True),    # compra deixando exatos 80
         (21, False),   # não compra quando sobra < 80
     ]
 )
@@ -94,7 +90,7 @@ def test_cauteloso_compra_se_sobrar_pelo_menos_80(preco, comprou):
 @pytest.mark.parametrize("random_choice", [True, False])
 def test_aleatorio_compra_conforme_random(monkeypatch, random_choice):
     monkeypatch.setattr('random.choice', lambda _: random_choice)
-    
+
     j1 = criar_jogador(estrategia=aleatorio, saldo=CEM)
     p1 = criar_propriedade(preco=CEM, aluguel=DEZ)
 
@@ -103,10 +99,10 @@ def test_aleatorio_compra_conforme_random(monkeypatch, random_choice):
     j2, p2, _ = comprar_ou_alugar(j1, p1, None)
 
     if random_choice is True:
-        j2.saldo == 0
+        assert j2.saldo == 0
         assert p2.proprietario == j2
     else:
-        j2.saldo == CEM
+        assert j2.saldo == CEM
         assert p2.proprietario is None
 
 

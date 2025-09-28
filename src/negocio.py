@@ -1,6 +1,4 @@
-from src import jogador
-from src import propriedade
-from src import estrategia
+from src import estrategia, jogador, propriedade
 
 
 def _comprar(j, p, jp):
