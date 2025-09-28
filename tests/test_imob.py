@@ -25,7 +25,7 @@ def test_impulsivo_compra_se_tem_saldo(preco, comprou):
 
     assert p1.proprietario is None
 
-    j2, p2, _ = comprar_ou_alugar(j1, p1, None)
+    j2, p2 = comprar_ou_alugar(j1, p1)
 
     if comprou:
         assert j2.saldo == CEM - preco
@@ -50,7 +50,7 @@ def test_exigente_compra_se_tem_saldo_e_aluguel_maior_que_50(preco, comprou):
 
     assert p1.proprietario is None
 
-    j2, p2, _ = comprar_ou_alugar(j1, p1, None)
+    j2, p2 = comprar_ou_alugar(j1, p1)
 
     if comprou:
         assert j2.saldo == CEM - preco
@@ -75,7 +75,7 @@ def test_cauteloso_compra_se_sobrar_pelo_menos_80(preco, comprou):
 
     assert p1.proprietario is None
 
-    j2, p2, _ = comprar_ou_alugar(j1, p1, None)
+    j2, p2 = comprar_ou_alugar(j1, p1)
 
     if comprou:
         assert j2.saldo == CEM - preco
@@ -96,7 +96,7 @@ def test_aleatorio_compra_conforme_random(monkeypatch, random_choice):
 
     assert p1.proprietario is None
 
-    j2, p2, _ = comprar_ou_alugar(j1, p1, None)
+    j2, p2 = comprar_ou_alugar(j1, p1)
 
     if random_choice is True:
         assert j2.saldo == 0
@@ -124,8 +124,7 @@ def test_aluga_se_ha_proprietario_e_saldo_suficiente(
     jp1 = criar_jogador(estrategia=impulsivo, saldo=CEM)
     p1 = criar_propriedade(preco=30, aluguel=aluguel, proprietario=jp1)
 
-    j2, p2, jp2 = comprar_ou_alugar(j1, p1, jp1)
+    j2, p2 = comprar_ou_alugar(j1, p1)
 
     assert j2.saldo == novo_saldo
-    assert p2.proprietario == jp2
-    assert jp2.saldo == novo_saldo_proprietario
+    assert p2.proprietario.saldo == novo_saldo_proprietario
