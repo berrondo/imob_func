@@ -1,9 +1,9 @@
 import pytest
 
-from src.estrategia import aleatorio, cauteloso, exigente, impulsivo
-from src.jogador import criar_jogador
-from src.negocio import comprar_ou_alugar
-from src.propriedade import criar_propriedade
+from imob.estrategia import aleatorio, cauteloso, exigente, impulsivo
+from imob.jogador import criar_jogador
+from imob.negocio import comprar_ou_alugar
+from imob.propriedade import criar_propriedade
 
 DEZ = 10
 CEM = 100

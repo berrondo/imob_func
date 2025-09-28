@@ -1,4 +1,4 @@
-from src import jogador, propriedade
+from imob import jogador, propriedade
 
 
 def _estrategia_eh_comprar(j, p):
@@ -23,7 +23,7 @@ def _tentar_alugar(j, p):
 
 
 def comprar_ou_alugar(j, p):
-    if not propriedade.tem_proprietario(p):
-        return _tentar_comprar(j, p)
-    else:
+    if propriedade.tem_proprietario(p):
         return _tentar_alugar(j, p)
+    else:
+        return _tentar_comprar(j, p)
