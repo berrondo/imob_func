@@ -15,3 +15,6 @@ def cauteloso(j, p):
 
 def aleatorio(j, p):
     return random.choice([True, False])
+
+
+estrategias = [impulsivo, exigente, cauteloso, aleatorio]
