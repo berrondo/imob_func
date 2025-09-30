@@ -6,7 +6,7 @@ def _estrategia_eh_comprar(j, p):
 
 
 def _tentar_comprar(j, p):
-    if jogador.tem_saldo(j, p.preco) and _estrategia_eh_comprar(j, p):
+    if jogador.tem_saldo_suficiente(j, p.preco) and _estrategia_eh_comprar(j, p):
         j2 = jogador.debitar(j, p.preco)
         p2 = propriedade.apropriar(p, j2)
         return j2, p2
@@ -14,7 +14,7 @@ def _tentar_comprar(j, p):
 
 
 def _tentar_alugar(j, p):
-    if jogador.tem_saldo(j, p.aluguel):
+    if jogador.tem_saldo_suficiente(j, p.aluguel):
         j2 = jogador.debitar(j, p.aluguel)
         jp2 = jogador.creditar(p.proprietario, p.aluguel)
         p2 = propriedade.apropriar(p, jp2)  # mesmo proprietario, novo objeto.
