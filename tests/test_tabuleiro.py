@@ -9,10 +9,11 @@ propriedades = [criar_propriedade(preco=0, aluguel=0)] * 20
 
 
 def test_criar_tabuleiro():
-    t = criar_tabuleiro(propriedades(), jogadores())
+    t = criar_tabuleiro(propriedades, jogadores)
 
     assert len(t.propriedades) == 20
     assert len(t.jogadores) == 4
+    assert len(t.posicoes) == 4
 
 
 def test_move_jogador_um_passo():
