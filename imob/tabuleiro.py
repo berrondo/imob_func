@@ -30,10 +30,9 @@ def mover_jogador(self, j, passos):
 
 
 def _bonificar_jogador(self, j, bonus=BONUS):
-    nome = j.nome   # nome da estrategia
     return self.set(
         'jogadores', self.jogadores.set(
-            nome, jogador.creditar(self.jogadores[nome], bonus)
+            j.nome, jogador.creditar(self.jogadores[j.nome], bonus)
         )
     )
 
