@@ -24,8 +24,15 @@ def posicao_do_jogador(self, j):
 def mover_jogador(self, j, passos):
     posicao = posicao_do_jogador(self, j)
     nova_volta, nova_posicao = divmod(posicao + passos, extensao(self))
-    if nova_volta:  # bonifica
-        j2 = jogador.creditar(self.jogadores[j.nome], BONUS)
-        js = self.jogadores.set(j.nome, j2)
-        self = self.set('jogadores', js)
+    if nova_volta:
+        self = _bonificar_jogador(self, j)
     return self.set('posicoes', self.posicoes.set(j.nome, nova_posicao))
+
+
+def _bonificar_jogador(self, j, bonus=BONUS):
+    nome = j.nome   # nome da estrategia
+    return self.set(
+        'jogadores', self.jogadores.set(
+            nome, jogador.creditar(self.jogadores[nome], bonus)
+        )
+    )
