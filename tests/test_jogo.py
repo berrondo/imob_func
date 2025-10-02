@@ -1,11 +1,4 @@
 from imob import jogador, jogo
-from imob.estrategia import estrategias
-from imob.jogador import criar_jogador
-from imob.propriedade import criar_propriedade
-
-jogadores = [j for j in [criar_jogador(e, 300) for e in estrategias]]
-
-propriedades = [criar_propriedade(preco=100, aluguel=10)] * 20
 
 
 def rodada(js, maximo=None, contador=0):
@@ -29,7 +22,7 @@ def rodada(js, maximo=None, contador=0):
         return rodada(js3, maximo, contador)
 
 
-def test_rodada():
+def test_rodada(jogadores):
     from pyrsistent import v
     js = v(*jogadores)
 
@@ -38,7 +31,7 @@ def test_rodada():
     assert len(js2) == 1
 
 
-def test_criar_jogo():
+def test_criar_jogo(propriedades, jogadores):
     jg = jogo.criar_jogo(propriedades, jogadores)
 
     assert jg.tabuleiro
