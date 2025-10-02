@@ -1,11 +1,18 @@
 from imob.estrategia import estrategias
 from imob.jogador import criar_jogador
 from imob.propriedade import criar_propriedade
-from imob.tabuleiro import criar_tabuleiro, extensao, mover_jogador, posicao_do_jogador
+from imob.tabuleiro import (
+    criar_tabuleiro,
+    extensao,
+    mover_jogador_com_bonus,
+    posicao_do_jogador,
+)
 
 jogadores = [j for j in [criar_jogador(e, 300) for e in estrategias]]
 
 propriedades = [criar_propriedade(preco=100, aluguel=10)] * 20
+
+BONUS = 100
 
 
 def test_criar_tabuleiro():
@@ -23,7 +30,7 @@ def test_move_jogador_um_passo():
 
     assert posicao_do_jogador(t1, j1) == -1
 
-    t2 = mover_jogador(t1, j1, 1)
+    t2 = mover_jogador_com_bonus(t1, j1, 1, BONUS)
 
     assert posicao_do_jogador(t2, j1) == 0
 
@@ -35,7 +42,7 @@ def test_jogador_volta_ao_inicio_do_tabuleiro_e_recebe_bonus():
     assert extensao(t1) == 20
     assert posicao_do_jogador(t1, j1) == -1
 
-    t2 = mover_jogador(t1, j1, 25)
+    t2 = mover_jogador_com_bonus(t1, j1, 25, BONUS)
 
     assert posicao_do_jogador(t2, j1) == 4
     assert t2.jogadores[j1.nome].saldo == 400

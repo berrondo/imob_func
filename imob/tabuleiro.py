@@ -2,8 +2,6 @@ from pyrsistent import m, v
 
 from imob import jogador
 
-BONUS = 100
-
 
 def criar_tabuleiro(propriedades, jogadores):
     return m(
@@ -21,20 +19,30 @@ def posicao_do_jogador(self, j):
     return self.posicoes[j.nome]
 
 
+def casa(self, j):
+    return self.propriedades[posicao_do_jogador(j)]
+
+
+def mover_jogador_com_bonus(self, j, passos, bonus):
+    nova_volta, self = mover_jogador(self, j, passos)
+    if nova_volta:
+        self = _bonificar_jogador(self, j, bonus)
+    return self
+
+
 def mover_jogador(self, j, passos):
     posicao = posicao_do_jogador(self, j)
     nova_volta, nova_posicao = divmod(posicao + passos, extensao(self))
-    if nova_volta:
-        self = _bonificar_jogador(self, j, BONUS)
-    return _alterar_posicao_do_jogador(self, j, nova_posicao)
+    return nova_volta, self.set('posicoes', self.posicoes.set(j.nome, nova_posicao))
 
 
-def _bonificar_jogador(self, j, bonus=BONUS):
-    return self.set(
-        'jogadores', self.jogadores.set(
-            j.nome, jogador.creditar(self.jogadores[j.nome], bonus)
-        )
-    )
+def _bonificar_jogador(self, j, bonus):
+    return atualizar_jogador(self, jogador.creditar(self.jogadores[j.nome], bonus))
 
-def _alterar_posicao_do_jogador(self, j, nova_posicao):
-    return self.set('posicoes', self.posicoes.set(j.nome, nova_posicao))
+
+def atualizar_jogador(self, j):
+    return self.set('jogadores', self.jogadores.set(j.nome, j))
+
+
+def atualizar_propriedade(self, p):
+    return self.set('propriedades', self.propriedades.set(idx, p))
