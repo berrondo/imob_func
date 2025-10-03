@@ -114,10 +114,10 @@ def test_aleatorio_compra_conforme_random(monkeypatch, random_choice):
     [
         (99, 1, 199),         # aluguel < saldo
         (100, 0, 200),        # aluguel = saldo
-        (101, 100, 100),      # aluguel > saldo
+        (101, -1, 201),       # aluguel > saldo
     ]
 )
-def test_aluga_se_ha_proprietario_e_saldo_suficiente(
+def test_sempre_paga_aluguel_se_ha_proprietario(
         estrategia, aluguel, novo_saldo, novo_saldo_proprietario
     ):
     j1 = criar_jogador(estrategia=estrategia, saldo=CEM)
