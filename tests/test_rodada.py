@@ -64,6 +64,7 @@ def test_rodada_proximo_com_remover():
 def test_rodada_remover():
     r = rodada.criar_rodada(3)
 
+    assert rodada.jogando(r) == 3
     assert r.indices == [0, 1, 2]
     assert r.da_vez == -1
     assert r.tamanho == 3
@@ -72,8 +73,9 @@ def test_rodada_remover():
 
     r2 = rodada.remover(r, 0)
 
+    assert rodada.jogando(r2) == 2
     assert r2.indices == [0, 1, 2]
     assert r2.da_vez == -1
-    assert r2.tamanho == 2
+    assert r2.tamanho == 3
     assert r2.removidos == [0]
     assert r2.rodadas == 0

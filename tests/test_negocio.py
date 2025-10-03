@@ -114,7 +114,7 @@ def test_aleatorio_compra_conforme_random(monkeypatch, random_choice):
     [
         (99, 1, 199),         # aluguel < saldo
         (100, 0, 200),        # aluguel = saldo
-        (101, -1, 201),       # aluguel > saldo
+        (101, 0, 100),        # aluguel > saldo
     ]
 )
 def test_sempre_paga_aluguel_se_ha_proprietario(

@@ -10,6 +10,11 @@ def comprar_ou_alugar(j, p):
 
 
 def alugar(j, p):
+    if not jogador.tem_saldo_suficiente(j, p.aluguel):
+        # para tirar o jodador do jogo sem creditar o alguel ao proprietario
+        # enquanto nao implementamos uma Invariant
+        j2 = jogador.debitar(j, j.saldo)  # zera o saldo
+        return j2, p  # nao tem saldo para pagar o aluguel
     j2 = jogador.debitar(j, p.aluguel)
     jp2 = jogador.creditar(p.proprietario, p.aluguel)
     p2 = propriedade.apropriar(p, jp2)  # mesmo proprietario, novo objeto.
