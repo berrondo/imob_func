@@ -2,7 +2,11 @@ from pyrsistent import m
 
 
 def criar_propriedade(preco, aluguel, proprietario=None):
-    return m(preco=preco, aluguel=aluguel, proprietario=proprietario)
+    return m(
+        preco=preco,
+        aluguel=aluguel,
+        proprietario=proprietario
+    )
 
 
 def tem_proprietario(self):

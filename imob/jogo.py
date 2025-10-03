@@ -2,15 +2,14 @@ import random
 
 from pyrsistent import m
 
-from imob import negocio
-from imob import rodada as rodada
-from imob import tabuleiro as tabuleiro
+from imob import negocio, rodada, tabuleiro
 
 BONUS = 100
 MAXIMO = 1000
 
 
 def criar_jogo(propriedades, jogadores):
+    for p in propriedades: print(p)
     return m(
         tabuleiro=tabuleiro.criar_tabuleiro(propriedades, jogadores),
         rodadas=rodada.criar_rodada(len(jogadores)),
@@ -19,29 +18,24 @@ def criar_jogo(propriedades, jogadores):
     )
 
 
-def jogar(self, maximo, contador=0):
+def jogar(self, maximo=1000, contador=0):
     contador += 1
-    if contador > maximo: #959:
+    if contador > maximo: # 959:
         return self
 
-    self = set_rodada(self)
+    self = proxima_rodada(self)
+    self, jogador_eliminado = jogador_do_turno(self, self.rodadas.turno)
+    if jogador_eliminado:
+        return jogar(self, maximo, contador)    # pula o jogador eliminado (sem saldo)
 
-    self = set_jogador(self, self.rodadas.da_vez)
-    if self.j.saldo <= 0:   # pula o jogador que perdeu (sem saldo)
-        return jogar(self, maximo, contador)
-
-    self = mover_jogador(self, self.rodadas.da_vez)
-    self = set_propriedade(self, self.rodadas.da_vez)
-
-    j2, p2 = negocio.comprar_ou_alugar(self.j, self.p)
-    print(contador, self.rodadas.da_vez, j2.nome, j2.saldo, p2.proprietario and p2.proprietario.nome)
-
-    pi = tabuleiro.posicao_do_jogador(self.tabuleiro, self.rodadas.da_vez)
-    self = atualizar_tabuleiro(self, self.rodadas.da_vez, j2, pi, p2)
+    self = mover_jogador(self, self.rodadas.turno)
+    self = propriedade_na_posicao(self, self.rodadas.turno)
+    j2, p2 = negocio.comprar_ou_alugar(self.j, self.p); print(contador, self.rodadas.turno, j2.nome, j2.saldo, p2.proprietario and p2.proprietario.nome)
+    self = atualizar_tabuleiro(self, j2, p2)
 
     if j2.saldo <= 0:   # jogador perdeu
         print(j2.nome, 'perdeu')
-        self = self.set('rodadas', rodada.remover(self.rodadas, self.rodadas.da_vez))
+        self = self.set('rodadas', rodada.remover(self.rodadas, self.rodadas.turno))
 
     if rodada.jogando(self.rodadas) == 1:   # sobrou o vencedor!
         for p in self.tabuleiro.propriedades:
@@ -58,28 +52,30 @@ def dado():
     return random.randint(1, 7)
 
 
-def set_rodada(self):
+def proxima_rodada(self):
     return self.set('rodadas', rodada.proximo(self.rodadas))
 
 
-def set_jogador(self, da_vez):
-    return self.set('j', self.tabuleiro.jogadores[da_vez])
+def jogador_do_turno(self, turno):
+    self = self.set('j', self.tabuleiro.jogadores[turno])
+    eliminado = self.j.saldo <= 0
+    return self, eliminado
 
 
-def set_propriedade(self, da_vez):
-    return self.set('p', tabuleiro.casa(self.tabuleiro, da_vez))
+def propriedade_na_posicao(self, turno):
+    return self.set('p', tabuleiro.casa(self.tabuleiro, turno))
 
 
-def mover_jogador(self, da_vez):
-    return self.set(
-        'tabuleiro', tabuleiro.mover_jogador_com_bonus(
-            self.tabuleiro, da_vez, dado(), BONUS
+def mover_jogador(self, turno):
+    return self.set('tabuleiro', tabuleiro.mover_jogador_com_bonus(
+            self.tabuleiro, turno, dado(), BONUS
         )
     )
 
 
-def atualizar_tabuleiro(self, ji, j, pi, p):
-    self = atualizar_jogador_no_tabuleiro(self, ji, j)
+def atualizar_tabuleiro(self, j, p):
+    self = atualizar_jogador_no_tabuleiro(self, self.rodadas.turno, j)
+    pi = tabuleiro.posicao_do_jogador(self.tabuleiro, self.rodadas.turno)
     return atualizar_propriedade_no_tabuleiro(self, pi, p)
 
 

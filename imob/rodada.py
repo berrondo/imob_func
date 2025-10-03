@@ -4,7 +4,7 @@ from pyrsistent import m, v
 def criar_rodada(n: int):
     indices = v(*range(n))
     return m(
-        da_vez=-1,
+        turno=-1,
         indices=indices,
         tamanho=len(indices),
         rodadas=0,
@@ -17,12 +17,12 @@ def jogando(self):
 
 
 def proximo(self):
-    volta, da_vez = divmod(self.da_vez + 1, jogando(self))
+    volta, turno = divmod(self.turno + 1, jogando(self))
     self = (self
-        .set('da_vez', self.indices[da_vez])
+        .set('turno', self.indices[turno])
         .set('rodadas', self.rodadas + volta)
     )
-    print("  '-> prox", list(self.removidos), self.rodadas, self.da_vez)
+    print("  '-> prox", list(self.removidos), self.rodadas, self.turno)
     return self
 
 

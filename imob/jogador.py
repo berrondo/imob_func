@@ -2,7 +2,11 @@ from pyrsistent import m
 
 
 def criar_jogador(estrategia, saldo):
-    return m(estrategia=estrategia, saldo=saldo, nome=estrategia.__name__)
+    return m(
+        estrategia=estrategia,
+        saldo=saldo,
+        nome=estrategia.__name__
+    )
 
 
 def tem_saldo_suficiente(self, valor):
