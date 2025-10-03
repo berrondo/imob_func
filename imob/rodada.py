@@ -1,9 +1,17 @@
-from pyrsistent import m, v
+from pyrsistent import PRecord, field, v
+
+
+class Rodada(PRecord):
+    turno = field(type=int)
+    indices = field()
+    tamanho = field(type=int)
+    rodadas = field(type=int)
+    removidos = field()
 
 
 def criar_rodada(n: int):
     indices = v(*range(n))
-    return m(
+    return Rodada(
         turno=-1,
         indices=indices,
         tamanho=len(indices),

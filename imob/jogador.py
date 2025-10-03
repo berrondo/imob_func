@@ -1,8 +1,14 @@
-from pyrsistent import m
+from pyrsistent import PRecord, field
+
+
+class Jogador(PRecord):
+    estrategia = field()
+    saldo = field(type=int)
+    nome = field(type=str)
 
 
 def criar_jogador(estrategia, saldo):
-    return m(
+    return Jogador(
         estrategia=estrategia,
         saldo=saldo,
         nome=estrategia.__name__

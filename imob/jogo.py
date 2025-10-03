@@ -1,6 +1,6 @@
 import random
 
-from pyrsistent import m
+from pyrsistent import PRecord, field
 
 from imob import negocio, rodada, tabuleiro
 
@@ -8,9 +8,16 @@ BONUS = 100
 MAXIMO = 1000
 
 
+class Jogo(PRecord):
+    tabuleiro = field()
+    rodadas = field()
+    j = field()
+    p = field()
+
+
 def criar_jogo(propriedades, jogadores):
     for p in propriedades: print(p)
-    return m(
+    return Jogo(
         tabuleiro=tabuleiro.criar_tabuleiro(propriedades, jogadores),
         rodadas=rodada.criar_rodada(len(jogadores)),
         j=None,

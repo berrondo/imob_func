@@ -1,8 +1,16 @@
-from pyrsistent import m
+from pyrsistent import PRecord, field
+
+from imob.jogador import Jogador
+
+
+class Propriedade(PRecord):
+    preco = field(type=int)
+    aluguel = field(type=int)
+    proprietario = field()
 
 
 def criar_propriedade(preco, aluguel, proprietario=None):
-    return m(
+    return Propriedade(
         preco=preco,
         aluguel=aluguel,
         proprietario=proprietario

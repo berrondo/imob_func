@@ -1,10 +1,17 @@
-from pyrsistent import m, v
+from pyrsistent import PRecord, field, v
 
 from imob import jogador
 
 
+class Tabuleiro(PRecord):
+    propriedades = field()
+    jogadores = field()
+    # proprietarios = field()   # ?
+    posicoes = field()
+
+
 def criar_tabuleiro(propriedades, jogadores):
-    return m(
+    return Tabuleiro(
         propriedades=v(*propriedades),
         jogadores=v(*jogadores),
         # proprietarios=v(*(v() for _ in jogadores)),   # ?
