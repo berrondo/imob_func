@@ -4,20 +4,28 @@ from pyrsistent import m, v
 def criar_rodada(n: int):
     indices = v(*range(n))
     return m(
-        da_vez=0,
+        da_vez=-1,
         indices=indices,
         tamanho=len(indices),
         rodadas=0,
-        removidos=v(),   # TODO
+        removidos=v(),
     )
 
 
-def proximo(r):
-    numero_de_rodadas, da_vez = divmod(r.da_vez + 1, r.tamanho)
-    return r.set('da_vez', da_vez).set('rodadas', numero_de_rodadas)
+def proximo(self):
+    volta, da_vez = divmod(self.da_vez + 1, self.tamanho)
+    self = (self
+        .set('da_vez', self.indices[da_vez])
+        .set('rodadas', self.rodadas + volta)
+    )
+    print("  '->", list(self.removidos), self.rodadas, self.da_vez)
+    return self
 
 
-def remover(r, n):
-    if n == r.da_vez:   # nao deveria remover quando restasse apenas 1!
-        r = proximo(r)  # sera que o numero de rodadas fica correto depois da remocao?
-    return r.set('indices', r.indices.remove(n)).set('tamanho', r.tamanho - 1)
+def remover(self, n):
+    self = (self
+        .set('removidos', self.removidos.append(n))
+        .set('tamanho', self.tamanho - 1)
+    )
+    # print(self.indices, self.tamanho, self.removidos)
+    return self
