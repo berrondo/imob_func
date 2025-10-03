@@ -23,7 +23,7 @@ def jogar(self, maximo=1000, contador=0):
     if contador > maximo: # 959:
         return self
 
-    self = proxima_rodada(self)
+    self = proxima_rodada(self); print("  '-> prox", list(self.rodadas.removidos), self.rodadas.rodadas, self.rodadas.turno)
     self, jogador_eliminado = jogador_do_turno(self, self.rodadas.turno)
     if jogador_eliminado:
         return jogar(self, maximo, contador)    # pula o jogador eliminado (sem saldo)
