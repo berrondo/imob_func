@@ -29,23 +29,8 @@ class Relatorio:
     def registrar_evento(self, jogo, tipo: str) -> None:
         """Registra um evento baseado no estado atual do jogo."""
 
-        # ##########################################################
-        if not hasattr(jogo, 'contador') or not jogo.j or not jogo.p:
-            return
-
         # Registra saldos
         self._saldos[jogo.j.nome] = jogo.j.saldo
-
-        # Determina o tipo de evento
-        # if jogo.p.proprietario is None:
-        #     return  # Nada aconteceu nesta rodada
-
-        # Se mudou o proprietário, é uma compra
-        # atual_prop = self._propriedades.get(jogo.pi)
-
-        # if atual_prop != jogo.p.proprietario:
-        #     self._propriedades[jogo.pi] = jogo.p.proprietario
-        # ##########################################################
 
         evento = EventoJogo(
             tipo=tipo,
