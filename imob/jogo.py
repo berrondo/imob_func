@@ -25,12 +25,7 @@ class Jogo(PClass):
     registro = field(type=(cartorio.Cartorio,))
     # reg = field(type=JRegistro)
 
-    # j = field(type=(jogador.Jogador, type(None)), initial=None)
-    # p = field(type=(propriedade.Propriedade, type(None)), initial=None)
     jj = field(type=JJogador)
-
-    # ji = field(type=(int, type(None)), initial=None)
-    # pi = field(type=(int, type(None)), initial=None)
     pp = field(type=JPropriedade)
 
     contador = field(type=int, initial=0)
@@ -92,8 +87,6 @@ def proxima_rodada(self):
 
 def jogador_do_turno(self, turno):
     j = self.tabuleiro.jogadores[turno]
-    # self = self.set('j', j)
-    # self = self.set('ji', turno)
     self = self.set('jj', JJogador(j=j, ji=turno))
     eliminado = self.jj.j.saldo <= 0
     return self, eliminado
@@ -102,10 +95,7 @@ def jogador_do_turno(self, turno):
 def propriedade_na_posicao(self, turno):
     p = tabuleiro.casa(self.tabuleiro, turno)
     pi = tabuleiro.posicao_do_jogador(self.tabuleiro, turno)
-    return self \
-        .set('pp', JPropriedade(p=p, pi=pi))
-        # .set('p', p) \
-        # .set('pi', pi) \
+    return self.set('pp', JPropriedade(p=p, pi=pi))
 
 
 def mover_jogador(self, turno):
