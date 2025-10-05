@@ -1,22 +1,19 @@
-from pyrsistent import PRecord, field, v
+from pyrsistent import PClass, field, pvector_field, v
 
 
-class Rodada(PRecord):
-    turno = field(type=int)
-    indices = field()
+class Rodada(PClass):
+    turno = field(type=int, initial=-1, mandatory=True)
+    indices = pvector_field(int)
     tamanho = field(type=int)
-    rodadas = field(type=int)
-    removidos = field()
+    rodadas = field(type=int, initial=0)
+    removidos = field(initial=v())
 
 
 def criar_rodada(n: int):
     indices = v(*range(n))
     return Rodada(
-        turno=-1,
         indices=indices,
         tamanho=len(indices),
-        rodadas=0,
-        removidos=v(),
     )
 
 

@@ -1,9 +1,13 @@
-from pyrsistent import PRecord, field
+from pyrsistent import CheckedPVector, PClass, field
 
 
-class Jogador(PRecord):
-    estrategia = field()
-    saldo = field(type=int)
+class Jogador(PClass):
+    estrategia = field(mandatory=True)
+    saldo = field(
+        type=int,
+        mandatory=True,
+        # invariant=lambda saldo: (saldo >= 0, 'saldo negativo'),
+    )
     nome = field(type=str)
 
 
@@ -25,3 +29,7 @@ def debitar(self, valor):
 
 def creditar(self, valor):
     return self.set('saldo', self.saldo + valor)
+
+
+class Jogadores(CheckedPVector):
+    __type__ = Jogador
