@@ -65,7 +65,7 @@ def jogar(self, maximo=1000, contador=None):
     )
     self = atualizar_registros(self, n.registro, n.banco_)
 
-    self = atualizar_tabuleiro(self, n.jj.j, n.pp.p)
+    self = atualizar_tabuleiro(self, n.jj, n.pp)
 
     if banco.saldo_de(self.banco_, self.jj.ji) <= 0:   # jif n.j.saldo <= 0:
         self = self.set('rodadas', rodada.remover(self.rodadas, self.rodadas.turno))
@@ -105,17 +105,21 @@ def mover_jogador(self, turno):
     )
 
 
-def atualizar_tabuleiro(self, j, p):
-    self = atualizar_jogador_no_tabuleiro(self, self.rodadas.turno, j)
-    return atualizar_propriedade_no_tabuleiro(self, self.pp.pi, p)
+def atualizar_tabuleiro(self, jj, pp):
+    self = atualizar_jogador_no_tabuleiro(self, jj)
+    return atualizar_propriedade_no_tabuleiro(self, pp)
 
 
-def atualizar_jogador_no_tabuleiro(self, ji, j):
-    return self.set('tabuleiro', tabuleiro.atualizar_jogador(self.tabuleiro, ji, j))
+def atualizar_jogador_no_tabuleiro(self, jj):
+    return self.set(
+        'tabuleiro', tabuleiro.atualizar_jogador(self.tabuleiro, jj.ji, jj.j)
+    )
 
 
-def atualizar_propriedade_no_tabuleiro(self, pi, p):
-    return self.set('tabuleiro', tabuleiro.atualizar_propriedade(self.tabuleiro, pi, p))
+def atualizar_propriedade_no_tabuleiro(self, pp):
+    return self.set(
+        'tabuleiro', tabuleiro.atualizar_propriedade(self.tabuleiro, pp.pi, pp.p)
+    )
 
 
 def atualizar_registros(self, registro, b):
