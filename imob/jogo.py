@@ -5,38 +5,47 @@ from pyrsistent import PClass, field
 from imob import (
     banco,
     cartorio,
-    jogador,
     negocio,
-    propriedade,
     relatorio,
     rodada,
     tabuleiro,
 )
+from imob.classes_de_dados import JJogador, JPropriedade, JRegistro
 
 BONUS = 100
 MAXIMO = 1000
 
 
+
 class Jogo(PClass):
     tabuleiro = field(type=tabuleiro.Tabuleiro, mandatory=True)
     rodadas = field(type=(rodada.Rodada,), mandatory=True)
+
     banco_ = field(type=(banco.Banco,), mandatory=False)
     registro = field(type=(cartorio.Cartorio,))
-    j = field(type=(jogador.Jogador, type(None)), initial=None)
-    p = field(type=(propriedade.Propriedade, type(None)), initial=None)
-    ji = field(type=(int, type(None)), initial=None)
-    pi = field(type=(int, type(None)), initial=None)
+    # reg = field(type=JRegistro)
+
+    # j = field(type=(jogador.Jogador, type(None)), initial=None)
+    # p = field(type=(propriedade.Propriedade, type(None)), initial=None)
+    jj = field(type=JJogador)
+
+    # ji = field(type=(int, type(None)), initial=None)
+    # pi = field(type=(int, type(None)), initial=None)
+    pp = field(type=JPropriedade)
+
     contador = field(type=int, initial=0)
 
 
 def criar_jogo(propriedades, jogadores):
-    # for p in propriedades: print(p)
-    # print([j.nome for j in jogadores])
     return Jogo(
         tabuleiro=tabuleiro.criar_tabuleiro(propriedades, jogadores),
         rodadas=rodada.criar_rodada(len(jogadores)),
         banco_=banco.criar_banco(len(jogadores), jogadores[0].saldo),
         registro=cartorio.criar_cartorio(),
+        # reg=JRegistro(
+        #     cartorio=cartorio.criar_cartorio(),
+        #     banco=banco.criar_banco(len(jogadores), jogadores[0].saldo),
+        # ),
     )
 
 
@@ -48,22 +57,26 @@ def jogar(self, maximo=1000, contador=None):
     self = proxima_rodada(self)
     self, jogador_eliminado = jogador_do_turno(self, self.rodadas.turno)
     if jogador_eliminado:
-        self = self.set('tabuleiro', tabuleiro.desapropriar_propriedade(self.tabuleiro, self.ji))
-        return jogar(self, maximo, self.contador)    # pula o jogador eliminado (sem saldo)
+        self = self.set(
+            'tabuleiro', tabuleiro.desapropriar_propriedade(self.tabuleiro, self.jj.ji)
+        )
+        return jogar(self, maximo, self.contador)    # pula o jogador (sem saldo)
 
     self = mover_jogador(self, self.rodadas.turno)
     self = propriedade_na_posicao(self, self.rodadas.turno)
 
-    n = negocio.comprar_ou_alugar(self.j, self.p, self.ji, self.pi, self.registro, self.banco_, self.tabuleiro.jogadores)
+    n = negocio.comprar_ou_alugar(
+        self.jj, self.pp, self.registro, self.banco_, self.tabuleiro.jogadores
+    )
     self = atualizar_registros(self, n.registro, n.banco_)
 
-    self = atualizar_tabuleiro(self, n.j, n.p)
+    self = atualizar_tabuleiro(self, n.jj.j, n.pp.p)
 
-    if banco.saldo_de(self.banco_, self.ji) <= 0:   # jif n.j.saldo <= 0:
+    if banco.saldo_de(self.banco_, self.jj.ji) <= 0:   # jif n.j.saldo <= 0:
         self = self.set('rodadas', rodada.remover(self.rodadas, self.rodadas.turno))
 
     self = relatorio.registrar(self, n.tipo)
-    if banco.resta_um(self.banco_):# if rodada.jogando(self.rodadas) == 1:
+    if banco.resta_um(self.banco_):  # if rodada.jogando(self.rodadas) == 1:
         return self
 
     return jogar(self, maximo, self.contador)
@@ -78,16 +91,21 @@ def proxima_rodada(self):
 
 
 def jogador_do_turno(self, turno):
-    self = self.set('j', self.tabuleiro.jogadores[turno])
-    self = self.set('ji', turno)
-    eliminado = self.j.saldo <= 0
+    j = self.tabuleiro.jogadores[turno]
+    # self = self.set('j', j)
+    # self = self.set('ji', turno)
+    self = self.set('jj', JJogador(j=j, ji=turno))
+    eliminado = self.jj.j.saldo <= 0
     return self, eliminado
 
 
 def propriedade_na_posicao(self, turno):
+    p = tabuleiro.casa(self.tabuleiro, turno)
+    pi = tabuleiro.posicao_do_jogador(self.tabuleiro, turno)
     return self \
-        .set('p', tabuleiro.casa(self.tabuleiro, turno)) \
-        .set('pi', tabuleiro.posicao_do_jogador(self.tabuleiro, turno))
+        .set('pp', JPropriedade(p=p, pi=pi))
+        # .set('p', p) \
+        # .set('pi', pi) \
 
 
 def mover_jogador(self, turno):
@@ -99,7 +117,7 @@ def mover_jogador(self, turno):
 
 def atualizar_tabuleiro(self, j, p):
     self = atualizar_jogador_no_tabuleiro(self, self.rodadas.turno, j)
-    return atualizar_propriedade_no_tabuleiro(self, self.pi, p)
+    return atualizar_propriedade_no_tabuleiro(self, self.pp.pi, p)
 
 
 def atualizar_jogador_no_tabuleiro(self, ji, j):
