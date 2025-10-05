@@ -10,6 +10,9 @@ class Jogador(PClass):
     )
     nome = field(type=str)
 
+    def __str__(self):
+        return f"{self.nome:<10} $ {self.saldo}"
+
 
 def criar_jogador(estrategia, saldo):
     return Jogador(

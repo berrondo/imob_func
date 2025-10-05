@@ -6,6 +6,10 @@ class Propriedade(PClass):
     aluguel = field(type=int, mandatory=True)
     proprietario = field(initial=None)
 
+    def __str__(self):
+        return f"${self.preco:>4}/{self.aluguel:<3} " \
+               f"{self.proprietario.nome if self.proprietario else 'None':<10}"
+
 
 def criar_propriedade(preco, aluguel, proprietario=None):
     return Propriedade(
@@ -15,8 +19,8 @@ def criar_propriedade(preco, aluguel, proprietario=None):
     )
 
 
-# def tem_proprietario(self):
-#     return self.proprietario is not None
+def tem_proprietario(self):
+    return self.proprietario is not None
 
 
 def apropriar(self, jogador):

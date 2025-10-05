@@ -30,8 +30,8 @@ class Jogo(PClass):
 
 
 def criar_jogo(propriedades, jogadores):
-    for p in propriedades: print(p)
-    print([j.nome for j in jogadores])
+    # for p in propriedades: print(p)
+    # print([j.nome for j in jogadores])
     return Jogo(
         tabuleiro=tabuleiro.criar_tabuleiro(propriedades, jogadores),
         rodadas=rodada.criar_rodada(len(jogadores)),
@@ -43,8 +43,6 @@ def criar_jogo(propriedades, jogadores):
 def jogar(self, maximo=1000, contador=None):
     self = self.set('contador', self.contador + 1 if contador is None else contador + 1)
     if self.contador > maximo:
-        print("\nJogo finalizado por limite de rodadas")
-        print(relatorio.relatorio_atual.gerar_relatorio())
         return self
 
     self = proxima_rodada(self)
@@ -57,18 +55,15 @@ def jogar(self, maximo=1000, contador=None):
     self = propriedade_na_posicao(self, self.rodadas.turno)
 
     n = negocio.comprar_ou_alugar(self.j, self.p, self.ji, self.pi, self.registro, self.banco_, self.tabuleiro.jogadores)
-    self = self.set('registro', n.registro)
-    self = self.set('banco_', n.banco_)
+    self = atualizar_registros(self, n.registro, n.banco_)
 
     self = atualizar_tabuleiro(self, n.j, n.p)
-    self = relatorio.registrar(self)
 
     if banco.saldo_de(self.banco_, self.ji) <= 0:   # jif n.j.saldo <= 0:
         self = self.set('rodadas', rodada.remover(self.rodadas, self.rodadas.turno))
 
+    self = relatorio.registrar(self, n.tipo)
     if banco.resta_um(self.banco_):# if rodada.jogando(self.rodadas) == 1:
-        print("\nJogo finalizado - Temos um vencedor!")
-        print(relatorio.relatorio_atual.gerar_relatorio())
         return self
 
     return jogar(self, maximo, self.contador)
@@ -113,3 +108,7 @@ def atualizar_jogador_no_tabuleiro(self, ji, j):
 
 def atualizar_propriedade_no_tabuleiro(self, pi, p):
     return self.set('tabuleiro', tabuleiro.atualizar_propriedade(self.tabuleiro, pi, p))
+
+
+def atualizar_registros(self, registro, b):
+    return self.set('registro', registro).set('banco_', b)

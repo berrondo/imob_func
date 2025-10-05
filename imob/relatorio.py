@@ -4,13 +4,19 @@ from datetime import datetime
 
 @dataclass
 class EventoJogo:
-    rodada: int
+    tipo: str  # 'compra' ou 'aluguel' ou ''
+
+    contador: int
     turno: int
-    jogador: str
-    tipo: str  # 'compra' ou 'aluguel'
-    propriedade_id: int
-    valor: float
-    proprietario: str | None = None
+    rodada: int
+
+    j: object # jogador.Jogador
+    ji: int
+    p: object # propriedade.Propriedade
+    pi: int
+
+    valor: int
+    banco: str | None = None
 
 
 @dataclass
@@ -20,8 +26,10 @@ class Relatorio:
     _saldos: dict[str, float] = field(default_factory=dict)
     _propriedades: dict[int, str] = field(default_factory=dict)
 
-    def registrar_evento(self, jogo) -> None:
+    def registrar_evento(self, jogo, tipo: str) -> None:
         """Registra um evento baseado no estado atual do jogo."""
+
+        # ##########################################################
         if not hasattr(jogo, 'contador') or not jogo.j or not jogo.p:
             return
 
@@ -29,63 +37,67 @@ class Relatorio:
         self._saldos[jogo.j.nome] = jogo.j.saldo
 
         # Determina o tipo de evento
-        if jogo.p.proprietario is None:
-            return  # Nada aconteceu nesta rodada
+        # if jogo.p.proprietario is None:
+        #     return  # Nada aconteceu nesta rodada
 
         # Se mudou o proprietário, é uma compra
-        prop_id = id(jogo.p)
-        atual_prop = self._propriedades.get(prop_id)
-        if atual_prop != jogo.p.proprietario:
-            self._propriedades[prop_id] = jogo.p.proprietario
-            evento = EventoJogo(
-                rodada=jogo.contador,
-                turno=jogo.rodadas.turno,
-                jogador=jogo.j.nome,
-                tipo='compra',
-                propriedade_id=prop_id,
-                valor=jogo.p.preco
-            )
-        else:
-            # Se não mudou o proprietário, é um aluguel
-            evento = EventoJogo(
-                rodada=jogo.contador,
-                turno=jogo.rodadas.turno,
-                jogador=jogo.j.nome,
-                tipo='aluguel',
-                propriedade_id=prop_id,
-                valor=jogo.p.aluguel,
-                proprietario=jogo.p.proprietario
-            )
+        # atual_prop = self._propriedades.get(jogo.pi)
+
+        # if atual_prop != jogo.p.proprietario:
+        #     self._propriedades[jogo.pi] = jogo.p.proprietario
+        # ##########################################################
+
+        evento = EventoJogo(
+            tipo=tipo,
+
+            contador=jogo.contador,
+            turno=jogo.rodadas.turno,
+            rodada=jogo.rodadas.rodadas,
+
+            j=jogo.j,
+            ji=jogo.ji,
+            p=jogo.p,
+            pi=jogo.pi,
+
+            valor=jogo.p.preco,
+            banco=jogo.banco_,
+        )
 
         self.eventos.append(evento)
 
-    def gerar_relatorio(self) -> str:
+    def gerar_relatorio(self, msg="") -> str:
         """Gera um relatório textual dos eventos do jogo."""
         linhas = [
-            "=== RELATÓRIO DO JOGO ===",
+            f"=== RELATÓRIO DO JOGO: {msg}",
             f"Início: {self.inicio.strftime('%Y-%m-%d %H:%M:%S')}",
             "\nEVENTOS:",
         ]
 
         for e in self.eventos:
-            if e.tipo == 'compra':
-                desc = (
-                    f"Rodada {e.rodada}, Turno {e.turno}: "
-                    f"{e.jogador} comprou propriedade {e.propriedade_id} por ${e.valor}"
+            desc = f"{e.contador:<5}{e.rodada:>4d}{e.turno:>2d}{e.ji:>2d} {e.j.nome:<10}"
+            if e.tipo == 'COMPRA':
+                desc += (
+                    f"comprou p{e.pi:<3} $ {e.valor}"
+                    f"{str(list(e.banco.contas)):>42}"
+                )
+            elif e.tipo == 'ALUGUEL':
+                desc += (
+                    f"ALUGOU  p{e.pi:<3}"
+                    f"$ {e.valor} -> {e.p.proprietario.nome if e.p else "alugou de quem?":<10} $ {e.p.proprietario.saldo}"
+                    f"{str(list(e.banco.contas)):>24}"
                 )
             else:
-                desc = (
-                    f"Rodada {e.rodada}, Turno {e.turno}: "
-                    f"{e.jogador} alugou propriedade {e.propriedade_id} "
-                    f"pagando ${e.valor} para {e.proprietario}"
+                desc += (
+                    # f"$ {e.valor} -> {e.p.proprietario.nome if e.p else "sem proprietário":<10}" # $ {e.p.proprietario.saldo}"
+                    f"{str(list(e.banco.contas)):>60}"
                 )
             linhas.append(desc)
 
         linhas.extend([
             "\nSALDOS FINAIS:",
-            *[f"{jogador}: ${saldo}" for jogador, saldo in self._saldos.items()],
+            *[f"{j:<10}: $ {saldo}" for j, saldo in self._saldos.items()],
             "\nPROPRIEDADES:",
-            *[f"Propriedade {pid}: {prop}" for pid, prop in self._propriedades.items()]
+            *[f"p{pid:<3}: {prop}" for pid, prop in self._propriedades.items()]
         ])
 
         return "\n".join(linhas)
@@ -95,7 +107,7 @@ class Relatorio:
 relatorio_atual = Relatorio()
 
 
-def registrar(jogo):
+def registrar(jogo, tipo: str):
     """Função helper para registrar eventos do jogo."""
-    relatorio_atual.registrar_evento(jogo)
+    relatorio_atual.registrar_evento(jogo, tipo)
     return jogo  # Retorna o jogo sem modificação para manter a composição funcional

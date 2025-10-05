@@ -11,6 +11,15 @@ def test_criar_propriedade():
     assert p.proprietario is None
 
 
+def test_str():
+    p = propriedade.criar_propriedade(preco=100, aluguel=10)
+    j = jogador.criar_jogador(estrategia=impulsivo, saldo=300)
+    p2 = propriedade.apropriar(p, j)
+
+    assert str(p) ==  "$ 100/10  None      "
+    assert str(p2) == "$ 100/10  impulsivo "
+
+
 def test_apropriar():
     p = propriedade.criar_propriedade(preco=100, aluguel=10)
     j = jogador.criar_jogador(estrategia=impulsivo, saldo=300)

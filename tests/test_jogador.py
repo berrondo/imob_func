@@ -10,6 +10,12 @@ def test_criar_jogador():
     assert j.nome == 'impulsivo'
 
 
+def test_str():
+    j = jogador.criar_jogador(estrategia=impulsivo, saldo=300)
+
+    assert str(j) == "impulsivo  $ 300"
+
+
 def test_creditar():
     j = jogador.criar_jogador(estrategia=impulsivo, saldo=300)
 
