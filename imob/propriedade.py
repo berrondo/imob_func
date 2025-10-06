@@ -5,6 +5,7 @@ class Propriedade(PClass):
     preco = field(type=int, mandatory=True)
     aluguel = field(type=int, mandatory=True)
     proprietario = field(initial=None)
+    i = field(type=int)  # gambiarra!
 
     def __str__(self):
         return f"${self.preco:>4}/{self.aluguel:<3} " \

@@ -10,8 +10,8 @@ class EventoJogo:
     turno: int
     rodada: int
 
-    jj: object # JJogador
-    pp: object # JPropriedade
+    j: object # Jogador
+    p: object # Propriedade
 
     valor: int
     banco: str | None = None
@@ -28,7 +28,7 @@ class Relatorio:
         """Registra um evento baseado no estado atual do jogo."""
 
         # Registra saldos
-        self._saldos[jogo.jj.j.nome] = jogo.jj.j.saldo
+        self._saldos[jogo.j.nome] = jogo.j.saldo
 
         evento = EventoJogo(
             tipo=tipo,
@@ -38,10 +38,10 @@ class Relatorio:
             rodada=jogo.rodadas.rodadas,
 
 
-            jj=jogo.jj,
-            pp=jogo.pp,
+            j=jogo.j,
+            p=jogo.p,
 
-            valor=jogo.pp.p.preco,
+            valor=jogo.p.preco,
             banco=jogo.banco_,
         )
 
@@ -56,21 +56,21 @@ class Relatorio:
         ]
 
         for e in self.eventos:
-            desc = f"{e.contador:<5}{e.rodada:>4d}{e.turno:>2d}{e.jj.ji:>2d} {e.jj.j.nome:<10}"
+            desc = f"{e.contador:<5}{e.rodada:>4d}{e.turno:>2d}{e.j.i:>2d} {e.j.nome:<10}"
             if e.tipo == 'COMPRA':
                 desc += (
-                    f"comprou p{e.pp.pi:<3} $ {e.valor}"
+                    f"comprou p{e.p.i:<3} $ {e.valor}"
                     f"{str(list(e.banco.contas)):>42}"
                 )
             elif e.tipo == 'ALUGUEL':
                 desc += (
-                    f"ALUGOU  p{e.pp.pi:<3}"
-                    f"$ {e.valor} -> {e.pp.p.proprietario.nome if e.pp else "alugou de quem?":<10} $ {e.pp.p.proprietario.saldo}"
+                    f"ALUGOU  p{e.p.i:<3}"
+                    f"$ {e.valor} -> {e.p.proprietario.nome if e.p else "alugou de quem?":<10} $ {e.p.proprietario.saldo}"
                     f"{str(list(e.banco.contas)):>24}"
                 )
             else:
                 desc += (
-                    # f"$ {e.valor} -> {e.pp.p.proprietario.nome if e.pp else "sem proprietário":<10}" # $ {e.pp.p.proprietario.saldo}"
+                    # f"$ {e.valor} -> {e.p.proprietario.nome if e.p else "sem proprietário":<10}" # $ {e.p.proprietario.saldo}"
                     f"{str(list(e.banco.contas)):>60}"
                 )
             linhas.append(desc)

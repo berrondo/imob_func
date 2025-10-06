@@ -9,6 +9,7 @@ class Jogador(PClass):
         # invariant=lambda saldo: (saldo >= 0, 'saldo negativo'),
     )
     nome = field(type=str)
+    i = field(type=int)  # gambiarra!
 
     def __str__(self):
         return f"{self.nome:<10} $ {self.saldo}"
