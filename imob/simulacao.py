@@ -13,12 +13,12 @@ def gerar_propriedades(how_many=20, median=5, stdv=1, price_scale=5, rent_scale=
     return [criar_propriedade(preco=price, aluguel=rent) for price, rent in params]
 
 
-# propriedades = [criar_propriedade(preco=50, aluguel=5)] * 20
+propriedades = [criar_propriedade(preco=50, aluguel=5)] * 20
 # random.shuffle(estrategias)
 jogadores = [criar_jogador(e, 300) for e in estrategias]
 
-jg = criar_jogo(gerar_propriedades(), jogadores)
-# jg = criar_jogo(propriedades, jogadores)
+# jg = criar_jogo(gerar_propriedades(), jogadores)
+jg = criar_jogo(propriedades, jogadores)
 
 jg = jogar(jg, maximo=1000, contador=0)
 

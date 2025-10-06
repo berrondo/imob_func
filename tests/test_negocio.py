@@ -135,7 +135,7 @@ def test_sempre_paga_aluguel_se_ha_proprietario(
         estrategia, aluguel, novo_saldo, novo_saldo_proprietario, banco
     ):
     j1 = criar_jogador(estrategia=estrategia, saldo=CEM).set('i', 0)
-    jp1 = criar_jogador(estrategia=impulsivo, saldo=CEM)
+    jp1 = criar_jogador(estrategia=impulsivo, saldo=CEM).set('i', 1)
     p1 = criar_propriedade(preco=30, aluguel=aluguel, proprietario=jp1).set('i', 0)
     c = registrar_compra(C, 0, 0)  # proprietario registrado
 

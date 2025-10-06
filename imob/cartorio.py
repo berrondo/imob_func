@@ -31,10 +31,5 @@ def obter_propriedades(self, ji: int) -> list[int] | None:
 
 
 def desapropriar(self, ji: int) -> Cartorio:
-    for (j, p) in self.compras:
-        if j == ji:
-            print('desapropriando', ji, p)
-            self = self.set('compras', self.compras.remove((j, p)))
-    return self
     compras = s(*((j, p) for (j, p) in self.compras if j != ji))
     return self.set('compras', compras)

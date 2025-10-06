@@ -18,14 +18,11 @@ MAXIMO = 1000
 class Jogo(PClass):
     tabuleiro = field(type=tabuleiro.Tabuleiro, mandatory=True)
     rodadas = field(type=(rodada.Rodada,), mandatory=True)
-    # atalhos pra objetos no turno
     j = field()
     p = field()
-
     banco_ = field(type=(banco.Banco,), mandatory=False)
     registro = field(type=(cartorio.Cartorio,))
     # reg = field(type=JRegistro)
-
     contador = field(type=int, initial=0)
 
 
@@ -47,12 +44,14 @@ def jogar(self, maximo=1000, contador=None):
     if self.contador > maximo:
         return self
 
+    self = identificar_jogadores(self)
+
     self = proxima_rodada(self)
     self, jogador_eliminado = jogador_do_turno(self, self.rodadas.turno)
     if jogador_eliminado:
-        self = self.set(
-            'tabuleiro', tabuleiro.desapropriar_propriedade(self.tabuleiro, self.j.i)
-        )
+        # self = self.set(
+        #     'tabuleiro', tabuleiro.desapropriar_propriedade(self.tabuleiro, self.j.i)
+        # )
         return jogar(self, maximo, self.contador)    # pula o jogador (sem saldo)
 
     self = mover_jogador(self, self.rodadas.turno)
@@ -61,13 +60,13 @@ def jogar(self, maximo=1000, contador=None):
     n = negocio.comprar_ou_alugar(
         self.j, self.p, self.registro, self.banco_, self.tabuleiro.jogadores
     )
-    self = atualizar_registros(self, n.registro, n.banco_)
 
     self = atualizar_tabuleiro(self, n.j, n.p)
 
     if banco.saldo_de(self.banco_, self.j.i) <= 0:   # jif n.j.saldo <= 0:
         self = self.set('rodadas', rodada.remover(self.rodadas, self.rodadas.turno))
 
+    self = atualizar_registros(self, n.registro, n.banco_)
     self = relatorio.registrar(self, n.tipo)
     if banco.resta_um(self.banco_):  # if rodada.jogando(self.rodadas) == 1:
         return self
@@ -79,13 +78,21 @@ def dado():
     return random.randint(1, 7)
 
 
+def identificar_jogadores(self):
+    jogadores = []
+    for i, j in enumerate(self.tabuleiro.jogadores):
+        jogadores.append(j.set('i', i))
+    return self.set('tabuleiro', self.tabuleiro.set('jogadores', jogadores))
+
+
 def proxima_rodada(self):
     return self.set('rodadas', rodada.proximo(self.rodadas))
 
 
 def jogador_do_turno(self, turno):
     j = self.tabuleiro.jogadores[turno]
-    self = self.set('j', j.set('i', turno))
+    assert j.i == turno
+    self = self.set('j', j)  # .set('i', turno))
     eliminado = self.j.saldo <= 0
     return self, eliminado
 
@@ -109,15 +116,11 @@ def atualizar_tabuleiro(self, j, p):
 
 
 def atualizar_jogador_no_tabuleiro(self, j):
-    return self.set(
-        'tabuleiro', tabuleiro.atualizar_jogador(self.tabuleiro, j.i, j)
-    )
+    return self.set('tabuleiro', tabuleiro.atualizar_jogador(self.tabuleiro, j.i, j))
 
 
 def atualizar_propriedade_no_tabuleiro(self, p):
-    return self.set(
-        'tabuleiro', tabuleiro.atualizar_propriedade(self.tabuleiro, p.i, p)
-    )
+    return self.set('tabuleiro', tabuleiro.atualizar_propriedade(self.tabuleiro, p.i, p))
 
 
 def atualizar_registros(self, registro, b):
