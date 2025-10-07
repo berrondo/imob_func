@@ -120,7 +120,10 @@ def atualizar_jogador_no_tabuleiro(self, j):
 
 
 def atualizar_propriedade_no_tabuleiro(self, p):
-    return self.set('tabuleiro', tabuleiro.atualizar_propriedade(self.tabuleiro, p.i, p))
+    self = self.set('tabuleiro', tabuleiro.atualizar_propriedade(self.tabuleiro, p.i, p))
+    if p.proprietario:
+        self = atualizar_jogador_no_tabuleiro(self, p.proprietario)
+    return self
 
 
 def atualizar_registros(self, registro, b):

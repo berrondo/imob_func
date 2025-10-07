@@ -28,9 +28,6 @@ def comprar_ou_alugar(j, p, registro=None, b=None, js=[]):
         case None:
             return tentar_comprar(n)
         case i_proprietario:   # index do jogador proprietario
-            print('-----', i_proprietario, p.proprietario and p.proprietario.nome, p.i)
-            # try: i_proprietario == p.proprietario.i, (i_proprietario, p.proprietario)
-            # except: import pdb; pdb.set_trace()
             # assert p.proprietario and p.proprietario.i == i_proprietario, \
             #        (i_proprietario, p.proprietario)
             return alugar(n, i_proprietario)
@@ -39,7 +36,6 @@ def comprar_ou_alugar(j, p, registro=None, b=None, js=[]):
 def alugar(self, i_proprietario):
     self = debitar_de_jogador(self, self.p.aluguel)
 
-    print('if', self.j.saldo, banco.saldo_de(self.banco_, self.j.i), '> 0')
     if banco.saldo_de(self.banco_, self.j.i) >= 0: # jogador nao perdeu
         if banco.saldo_de(self.banco_, i_proprietario) > 0: # proprietario ainda joga
             if self.p.proprietario: # proprietario ainda esta setado!!!
@@ -50,10 +46,10 @@ def alugar(self, i_proprietario):
             else:
                 print('PROPRIETARIO DESAPROPRIADO ANTES DE RECEBER ALUGUEL', self.p.i, i_proprietario)
 
-    elif banco.saldo_de(self.banco_, self.j.i) <= 0:  # se zerou, perdeu, perde as propriedades e nao recebe mais alugueis
+    # if banco.saldo_de(self.banco_, self.j.i) <= 0:  # se zerou, perdeu, perde as propriedades e nao recebe mais alugueis
+    if self.j.saldo <= 0:  # se zerou, perdeu, perde as propriedades e nao recebe mais alugueis
         self = despejar_jogador_de_suas_propriedades(self)
 
-    print('ALUGUEL', self.banco_, self.j.i,  self.p.aluguel, self.j.saldo, [j.saldo for j in self.js]) #, self.registro)
     return self
 
 
@@ -73,7 +69,12 @@ def comprar(self):
     self = self.set('registro', cartorio.registrar_compra(self.registro, self.j.i, self.p.i))
     self = debitar_de_jogador(self, self.p.preco)
     self = atualizar_proprietario(self, self.j)
-    print('COMPRA', self.banco_, self.j.i,  self.p.preco, self.j.saldo, [j.saldo for j in self.js], self.registro)
+
+
+    # elif banco.saldo_de(self.banco_, self.j.i) <= 0:  # se zerou, perdeu, perde as propriedades e nao recebe mais alugueis
+    if self.j.saldo <= 0:  # se zerou, perdeu, perde as propriedades e nao recebe mais alugueis
+        self = despejar_jogador_de_suas_propriedades(self)
+
     return self
 
 
@@ -86,6 +87,7 @@ def debitar_de_jogador(self, valor):
 
 def creditar_para_proprietario(self, jp, valor):
     if self.p.proprietario:
+        assert self.p.proprietario.i == jp.i, (jp.i, self.p.proprietario.i)
         self = self.set('banco_', banco.creditar_em(self.banco_, jp.i, valor))
         jp2 = jogador.creditar(self.p.proprietario, valor)
         self = atualizar_proprietario(self, jp2)
@@ -103,12 +105,14 @@ def atualizar_proprietario(self, jp):
 def despejar_jogador_de_suas_propriedades(self):
     print('DESPEJO', self.j.i, self.j.nome, self.j.saldo)
     self = self.set('registro', cartorio.desapropriar(self.registro, self.j.i))
-    assert cartorio.obter_propriedades(self.registro, self.j.i) == set(), cartorio.obter_propriedades(self.registro, self.j.i)
-    print(' ', self.registro)
-    ps = []
-    for p in self.tabuleiro.propriedades:
-        if p.proprietario and p.proprietario.i == self.j.i:
-            p = propriedade.apropriar(p, None)
-        ps.append(p)
-    self = self.set('tabuleiro', self.tabuleiro.set('propriedades', ps))
+    assert cartorio.obter_propriedades(
+        self.registro, self.j.i) == [], cartorio.obter_propriedades(self.registro, self.j.i
+    )
+    # ps = []
+    # for p in self.tabuleiro.propriedades:
+    #     if p.proprietario and p.proprietario.i == self.j.i:
+    #         p = propriedade.apropriar(p, None)
+    #     ps.append(p)
+    # self = self.set('tabuleiro', self.tabuleiro.set('propriedades', ps))
+    self = self.set('tipo', 'DESPEJO')
     return self

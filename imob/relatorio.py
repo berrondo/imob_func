@@ -10,6 +10,8 @@ class EventoJogo:
     turno: int
     rodada: int
 
+    saldos: list[int]
+    cartorio: list[tuple[int, int]]
     j: object # Jogador
     p: object # Propriedade
 
@@ -30,6 +32,8 @@ class Relatorio:
         # Registra saldos
         self._saldos[jogo.j.nome] = jogo.j.saldo
 
+        valor = jogo.p.preco if tipo == 'COMPRA' else jogo.p.aluguel if tipo == 'ALUGUEL' else 0
+
         evento = EventoJogo(
             tipo=tipo,
 
@@ -37,11 +41,12 @@ class Relatorio:
             turno=jogo.rodadas.turno,
             rodada=jogo.rodadas.rodadas,
 
-
+            saldos=[j.saldo for j in jogo.tabuleiro.jogadores],
+            cartorio=list(jogo.registro.compras),
             j=jogo.j,
             p=jogo.p,
 
-            valor=jogo.p.preco,
+            valor=valor,
             banco=jogo.banco_,
         )
 
@@ -59,19 +64,32 @@ class Relatorio:
             desc = f"{e.contador:<5}{e.rodada:>4d}{e.turno:>2d}{e.j.i:>2d} {e.j.nome:<10}"
             if e.tipo == 'COMPRA':
                 desc += (
-                    f"comprou p{e.p.i:<3} $ {e.valor}"
-                    f"{str(list(e.banco.contas)):>42}"
+                    f"_C_ p{e.p.i:<3} $ {e.valor}"
+                    f"{str(list(e.banco.contas)):>24}"
+                    f"{str(e.saldos):>24}"
+                    f"  {str(e.cartorio)}"
                 )
             elif e.tipo == 'ALUGUEL':
                 desc += (
-                    f"ALUGOU  p{e.p.i:<3}"
-                    f"$ {e.valor} -> {e.p.proprietario.nome if e.p else "alugou de quem?":<10} $ {e.p.proprietario.saldo}"
+                    f"_a_ p{e.p.i:<3} $ {e.valor}"
                     f"{str(list(e.banco.contas)):>24}"
+                    f"{str(e.saldos):>24}"
+                    f" -> {e.p.proprietario.nome if e.p else "alugou de quem?":<10} $ {e.p.proprietario.saldo}"
+                    f"  {str(e.cartorio)}"
+                )
+            elif e.tipo == 'DESPEJO':
+                desc += (
+                    f"_D_"
+                    f"{str(list(e.banco.contas)):>41}"
+                    f"{str(e.saldos):>24}"
+                    f"  {str(e.cartorio)}"
                 )
             else:
                 desc += (
                     # f"$ {e.valor} -> {e.p.proprietario.nome if e.p else "sem proprietário":<10}" # $ {e.p.proprietario.saldo}"
-                    f"{str(list(e.banco.contas)):>60}"
+                    f"{str(list(e.banco.contas)):>37}"
+                    f"{str(e.saldos):>24}"
+                    f"  {str(e.cartorio)}"
                 )
             linhas.append(desc)
 
