@@ -30,5 +30,10 @@ def proximo(self):
         .set('contador', self.contador + 1)
 
 
-def remover(self, n):
-    return self.set('removidos', self.removidos.append(n))
+def remover(self):
+    return self.set('removidos', self.removidos.append(self.turno))
+
+
+def resta_um(self):
+    # len(self.rodadas.removidos) == 3
+    return jogando(self) == 1
