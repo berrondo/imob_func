@@ -37,7 +37,7 @@ class Relatorio:
         evento = EventoJogo(
             tipo=tipo,
 
-            contador=jogo.contador,
+            contador=jogo.rodadas.contador,
             turno=jogo.rodadas.turno,
             rodada=jogo.rodadas.rodadas,
 

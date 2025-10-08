@@ -22,31 +22,29 @@ class Jogo(PClass):
     p = field()
     banco_ = field(type=(banco.Banco,), mandatory=False)
     registro = field(type=(cartorio.Cartorio,))
-    contador = field(type=int, initial=0)
 
 
 def criar_jogo(propriedades, jogadores, saldo_inicial=300):
-    return Jogo(
+    jg = Jogo(
         tabuleiro=tabuleiro.criar_tabuleiro(propriedades, jogadores),
         rodadas=rodada.criar_rodada(len(jogadores)),
         banco_=banco.criar_banco(len(jogadores), saldo_inicial),
         registro=cartorio.criar_cartorio(),
     )
+    jg = identificar_jogadores(jg)
+    return jg
 
 
-def jogar(self, maximo=1000, contador=None):
+def jogar(self, maximo=1000):
     #
-    self = self.set('contador', self.contador + 1 if contador is None else contador + 1)
-    if self.contador > maximo:
+    self = proxima_rodada(self)
+    if self.rodadas.contador > maximo:
         return self
 
-    #
-    self = identificar_jogadores(self)
-    self = proxima_rodada(self)
     self, jogador_eliminado = jogador_do_turno(self, self.rodadas.turno)
     if jogador_eliminado:
         self = relatorio.registrar(self, '')
-        return jogar(self, maximo, self.contador)    # pula o jogador (sem saldo)
+        return jogar(self, maximo)    # pula o jogador (sem saldo)
 
     #
     self = mover_jogador_com_bonus(self, self.rodadas.turno, BONUS)
@@ -60,7 +58,7 @@ def jogar(self, maximo=1000, contador=None):
     #
     if rodada.jogando(self.rodadas) == 1:  # if len(self.rodadas.removidos) == 3:
         return self
-    return jogar(self, maximo, self.contador)
+    return jogar(self, maximo)
 
 
 def dado():

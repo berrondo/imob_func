@@ -22,6 +22,6 @@ jogadores = [criar_jogador(e) for e in estrategias]
 # jg = criar_jogo(gerar_propriedades(), jogadores)
 jg = criar_jogo(propriedades, jogadores, SALDO_INICIAL)
 
-jg = jogar(jg, maximo=1000, contador=0)
+jg = jogar(jg, maximo=1000)
 
 print(relatorio.relatorio_atual.gerar_relatorio())
