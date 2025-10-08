@@ -22,7 +22,7 @@ def jogando(self):
 
 
 def proximo(self):
-    volta, turno = divmod(self.turno + 1, jogando(self))
+    volta, turno = divmod(self.turno + 1, jogando(self) or 1)  # evita div/0 TODO
     return self \
         .set('turno', self.indices[turno]) \
         .set('rodadas', self.rodadas + volta)

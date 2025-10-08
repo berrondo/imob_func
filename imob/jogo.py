@@ -11,7 +11,7 @@ from imob import (
     tabuleiro,
 )
 
-BONUS = 100
+BONUS = 1
 MAXIMO = 1000
 
 
@@ -22,55 +22,44 @@ class Jogo(PClass):
     p = field()
     banco_ = field(type=(banco.Banco,), mandatory=False)
     registro = field(type=(cartorio.Cartorio,))
-    # reg = field(type=JRegistro)
     contador = field(type=int, initial=0)
 
 
-def criar_jogo(propriedades, jogadores):
+def criar_jogo(propriedades, jogadores, saldo_inicial=300):
     return Jogo(
         tabuleiro=tabuleiro.criar_tabuleiro(propriedades, jogadores),
         rodadas=rodada.criar_rodada(len(jogadores)),
-        banco_=banco.criar_banco(len(jogadores), jogadores[0].saldo),
+        banco_=banco.criar_banco(len(jogadores), saldo_inicial),
         registro=cartorio.criar_cartorio(),
-        # reg=JRegistro(
-        #     cartorio=cartorio.criar_cartorio(),
-        #     banco=banco.criar_banco(len(jogadores), jogadores[0].saldo),
-        # ),
     )
 
 
 def jogar(self, maximo=1000, contador=None):
+    #
     self = self.set('contador', self.contador + 1 if contador is None else contador + 1)
     if self.contador > maximo:
         return self
 
+    #
     self = identificar_jogadores(self)
-
     self = proxima_rodada(self)
     self, jogador_eliminado = jogador_do_turno(self, self.rodadas.turno)
     if jogador_eliminado:
-        # self = self.set(
-        #     'tabuleiro', tabuleiro.desapropriar_propriedade(self.tabuleiro, self.j.i)
-        # )
+        self = relatorio.registrar(self, '')
         return jogar(self, maximo, self.contador)    # pula o jogador (sem saldo)
 
-    self = mover_jogador(self, self.rodadas.turno)
+    #
+    self = mover_jogador_com_bonus(self, self.rodadas.turno, BONUS)
     self = propriedade_na_posicao(self, self.rodadas.turno)
-
-    n = negocio.comprar_ou_alugar(
-        self.j, self.p, self.registro, self.banco_, self.tabuleiro.jogadores
-    )
-
-    self = atualizar_tabuleiro(self, n.j, n.p)
-
-    if banco.saldo_de(self.banco_, self.j.i) <= 0:   # jif n.j.saldo <= 0:
-        self = self.set('rodadas', rodada.remover(self.rodadas, self.rodadas.turno))
-
+    n = negocio.comprar_ou_alugar(self.j, self.p, self.registro, self.banco_)
     self = atualizar_registros(self, n.registro, n.banco_)
+    if banco.saldo_de(self.banco_, self.j.i) <= 0:
+        self = self.set('rodadas', rodada.remover(self.rodadas, self.rodadas.turno))
     self = relatorio.registrar(self, n.tipo)
-    if banco.resta_um(self.banco_):  # if rodada.jogando(self.rodadas) == 1:
-        return self
 
+    #
+    if rodada.jogando(self.rodadas) == 1:  # if len(self.rodadas.removidos) == 3:
+        return self
     return jogar(self, maximo, self.contador)
 
 
@@ -93,7 +82,7 @@ def jogador_do_turno(self, turno):
     j = self.tabuleiro.jogadores[turno]
     assert j.i == turno
     self = self.set('j', j)  # .set('i', turno))
-    eliminado = self.j.saldo <= 0
+    eliminado = banco.saldo_de(self.banco_, self.j.i) <= 0
     return self, eliminado
 
 
@@ -103,27 +92,13 @@ def propriedade_na_posicao(self, turno):
     return self.set('p', p.set('i', pi))
 
 
-def mover_jogador(self, turno):
-    return self.set('tabuleiro', tabuleiro.mover_jogador_com_bonus(
-            self.tabuleiro, turno, dado(), BONUS
-        )
+def mover_jogador_com_bonus(self, turno, bonus):
+    t, nova_volta = tabuleiro.mover_jogador_com_bonus(
+        self.tabuleiro, turno, dado(), bonus
     )
-
-
-def atualizar_tabuleiro(self, j, p):
-    self = atualizar_jogador_no_tabuleiro(self, j)
-    return atualizar_propriedade_no_tabuleiro(self, p)
-
-
-def atualizar_jogador_no_tabuleiro(self, j):
-    return self.set('tabuleiro', tabuleiro.atualizar_jogador(self.tabuleiro, j.i, j))
-
-
-def atualizar_propriedade_no_tabuleiro(self, p):
-    self = self.set('tabuleiro', tabuleiro.atualizar_propriedade(self.tabuleiro, p.i, p))
-    if p.proprietario:
-        self = atualizar_jogador_no_tabuleiro(self, p.proprietario)
-    return self
+    if nova_volta:
+        self = self.set('banco_', banco.creditar_em(self.banco_, self.j.i, BONUS))
+    return self.set('tabuleiro', t)
 
 
 def atualizar_registros(self, registro, b):

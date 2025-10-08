@@ -1,4 +1,4 @@
-from pyrsistent import CheckedPSet, CheckedPVector, PClass, PRecord, field, pvector_field, v
+from pyrsistent import PClass, pvector_field, v
 
 # class Conta(PRecord):
 #     balanco = pmap_field(int, str)
@@ -35,5 +35,5 @@ def debitar_de(self, ji: int, valor: int) -> Banco:
     return self.set('contas', self.contas.set(ji, self.contas[ji] - valor))
 
 
-def resta_um(self) -> bool:
-    return len([c for c in self.contas if c >= 0]) == 1
+# def resta_um(self) -> bool:
+#     return len([c for c in self.contas if c >= 0]) == 1
