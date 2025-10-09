@@ -2,14 +2,7 @@ import random
 
 from pyrsistent import PClass, field
 
-from imob import (
-    banco,
-    cartorio,
-    negocio,
-    relatorio,
-    rodada,
-    tabuleiro,
-)
+from imob import banco, cartorio, negocio, relatorio, rodada, tabuleiro
 
 SALDO_INICIAL = 300
 BONUS = 1
@@ -44,17 +37,20 @@ def jogar(g, maximo=1000):
     if g.rodadas.contador > maximo:
         return g
 
-    g = jogador_do_turno(g, turno)
+    g, eliminado = jogador_do_turno(g, turno)
+    if eliminado:
+        g = relatorio.registrar(g, '')
+
     g, volta = mover_jogador(g, turno, BONUS)
     if volta:
         g = creditar_bonus_ao_jogador(g)
 
     g = propriedade_na_posicao(g, turno)
-    n, eliminado = negocio.comprar_ou_alugar(g.j, g.p, g.registro, g.banco_)
-    if eliminado:
+    n, r, b = negocio.comprar_ou_alugar(g.j, g.p, g.registro, g.banco_)
+    if n.seria_eliminado:
         g = remover_jogador_da_rodada(g)
 
-    g = atualizar_registros(g, n.registro, n.banco_)
+    g = atualizar_registros(g, r, b)
     g = relatorio.registrar(g, n.tipo)
 
     return jogar(g, maximo)
@@ -75,13 +71,8 @@ def proxima_rodada(g):
 
 
 def jogador_do_turno(g, turno):
-    j = g.tabuleiro.jogadores[turno]
-    assert j.i == turno
-    g = g.set('j', j)
-    eliminado = banco.saldo_de(g.banco_, g.j.i) <= 0
-    if eliminado:
-        g = relatorio.registrar(g, '')
-    return g
+    g = g.set('j', g.tabuleiro.jogadores[turno])
+    return g, banco.saldo_de(g.banco_, g.j.i) <= 0
 
 
 def propriedade_na_posicao(g, turno):

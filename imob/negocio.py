@@ -5,69 +5,78 @@ from imob import banco, cartorio, jogador, propriedade
 
 class Negocio(PClass):
     tipo = field(type=str, initial='')
-    j = field(jogador.Jogador)
-    p = field(propriedade.Propriedade)
-    banco_ = field()
-    registro = field(type=cartorio.Cartorio)
+    precondicoes = field(type=bool, initial=False)
+    j = field(type=jogador.Jogador)
+    p = field(type=propriedade.Propriedade)
+    valor = field(type=int)
+    debitar_de = field(type=int)
+    creditar_para = field(type=(int, type(None)), initial=None)
+    seria_eliminado = field(type=bool, initial=False)
 
 
-def criar_negocio(j, p, registro=None, b=None):
-    return Negocio(j=j, p=p, banco_=b, registro=registro)
+def tentar_comprar(j, p, ppi, registro, banco_):
+    assert ppi is None, (registro.compras, j.i, p.i)
+    valor = p.preco
+
+    c = Negocio(
+        tipo='COMPRA',
+        precondicoes=all([
+            ppi is None,
+            banco.saldo_de(banco_, j.i) >= p.preco,
+            j.estrategia(banco.saldo_de(banco_, j.i), p)
+        ]),
+        creditar_para=None,
+
+        j=j, p=p, valor=valor, debitar_de=j.i,
+        seria_eliminado=(banco.saldo_de(banco_, j.i) - valor) <= 0,
+    )
+
+    match c.precondicoes:
+        case True:
+            match c.seria_eliminado:
+                case False:
+                    banco_ = banco.debitar_de(banco_, c.debitar_de, c.valor)
+                    registro = cartorio.registrar_compra(registro, c.debitar_de, p.i)
+                case True:
+                    banco_ = banco.debitar_de(banco_, c.debitar_de, c.valor)
+                    registro = cartorio.desapropriar(registro, c.debitar_de)
+                    c = c.set('tipo', 'DESPEJO')
+        case False:
+            c = c.set('seria_eliminado', False)
+            c = c.set('tipo', '')
+
+    return c, registro, banco_
 
 
-def comprar_ou_alugar(j, p, registro=None, b=None):
-    n = criar_negocio(j, p, registro, b)
+def tentar_alugar(j, p, ppi, registro, banco_):
+    assert ppi is not None, (registro.compras, j.i, p.i)
+    valor = p.aluguel
 
-    match cartorio.obter_proprietario(n.registro, p.i):
+    a = Negocio(
+        tipo='ALUGUEL',
+        precondicoes=True,
+        creditar_para=ppi,
+
+        j=j, p=p, valor=valor, debitar_de=j.i,
+        seria_eliminado=(banco.saldo_de(banco_, j.i) - valor) <= 0,
+    )
+
+    match a.seria_eliminado:
+        case False:
+            banco_ = banco.debitar_de(banco_, a.debitar_de, a.valor)
+            banco_ = banco.creditar_em(banco_, a.creditar_para, a.valor)
+        case True:
+            banco_ = banco.debitar_de(banco_, a.debitar_de, a.valor)
+            registro = cartorio.desapropriar(registro, a.debitar_de)
+            a = a.set('tipo', 'DESPEJO')
+
+    return a, registro, banco_
+
+
+def comprar_ou_alugar(j, p, registro, banco_):
+    ppi = cartorio.obter_proprietario(registro, p.i)
+    match ppi:
         case None:
-            n = tentar_comprar(n)
-        case i_proprietario:
-            n = alugar(n, i_proprietario)
-
-    if saldo_de(n, n.j.i) <= 0:
-        return despejar_jogador_de_suas_propriedades(n), True  # eliminado!
-
-    return n, False
-
-
-def tentar_comprar(n):
-    saldo = saldo_de(n, n.j.i)
-    if saldo >= n.p.preco and estrategia_eh_comprar(n.j, saldo, n.p):
-        n = comprar(n)
-    return n
-
-
-def comprar(n):
-    n = debitar_de_jogador(n, n.p.preco)
-    n = n.set('registro', cartorio.registrar_compra(n.registro, n.j.i, n.p.i))
-    return n.set('tipo', 'COMPRA')
-
-
-def alugar(n, i_proprietario):
-    n = debitar_de_jogador(n, n.p.aluguel)
-    saldo = saldo_de(n, n.j.i)
-    if saldo >= 0 and saldo_de(n, i_proprietario) > 0:  # proprietario ainda joga
-        n = creditar_para_proprietario(n, i_proprietario, n.p.aluguel)
-        n = n.set('tipo', 'ALUGUEL')
-    return n
-
-
-def saldo_de(n, ji):
-    return banco.saldo_de(n.banco_, ji)
-
-
-def estrategia_eh_comprar(j,  saldo, p):
-    return j.estrategia(saldo, p)
-
-
-def debitar_de_jogador(n, valor):
-    return n.set('banco_', banco.debitar_de(n.banco_, n.j.i, valor))
-
-
-def creditar_para_proprietario(n, jpi, valor):
-    return n.set('banco_', banco.creditar_em(n.banco_, jpi, valor))
-
-
-def despejar_jogador_de_suas_propriedades(n):
-    n = n.set('registro', cartorio.desapropriar(n.registro, n.j.i))
-    return n.set('tipo', 'DESPEJO')
+            return tentar_comprar(j, p, ppi, registro, banco_)
+        case _:
+            return tentar_alugar(j, p, ppi, registro, banco_)
