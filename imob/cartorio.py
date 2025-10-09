@@ -1,12 +1,12 @@
-from pyrsistent import CheckedPSet, PClass, PRecord, field, s
+from pyrsistent import CheckedPSet, PClass, field, s
 
 
-class Compra(CheckedPSet):
+class Compras(CheckedPSet):
     __type__ = tuple  # (j compra p)
 
 
-class Cartorio(PRecord):
-    compras = field(Compra)  # (j compra p)
+class Cartorio(PClass):
+    compras = field(Compras)  # (j compra p)
 
 
 def criar_cartorio() -> Cartorio:

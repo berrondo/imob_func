@@ -31,33 +31,10 @@ def casa(self, ji):
 
 def mover_jogador_com_bonus(self, ji, passos, bonus):
     self, nova_volta = mover_jogador(self, ji, passos)
-    # if nova_volta:
-    #     self = _bonificar_jogador(self, ji, bonus)
     return self, nova_volta
 
 
 def mover_jogador(self, ji, passos):
     posicao = posicao_do_jogador(self, ji)
     nova_volta, nova_posicao = divmod(posicao + passos, extensao(self))
-    # print(nova_volta, nova_posicao)
     return self.set('posicoes', self.posicoes.set(ji, nova_posicao)), nova_volta
-
-
-# def _bonificar_jogador(self, ji, bonus):
-#     return atualizar_jogador(self, ji, jogador.creditar(self.jogadores[ji], bonus))
-
-
-# def atualizar_jogador(self, ji, j):
-#     return self.set('jogadores', self.jogadores.set(ji, j))
-
-
-# def atualizar_propriedade(self, pi, p):
-#     return self.set('propriedades', self.propriedades.set(pi, p))
-
-
-# def desapropriar_propriedade(self, ji):
-#     for pi, p in enumerate(self.propriedades):
-#         if p.proprietario and p.proprietario == self.jogadores[ji]:
-#             p = propriedade.desapropriar(p)
-#             self = atualizar_propriedade(self, pi, p)
-#     return self

@@ -36,29 +36,17 @@ def criar_jogo(propriedades, jogadores, saldo_inicial=300):
 
 
 def jogar(self, maximo=1000):
-    #
     self, turno = proxima_rodada(self)
     if self.rodadas.contador > maximo:
         return self
 
-    #
-    self, jogador_eliminado = jogador_do_turno(self, turno)
-    if jogador_eliminado:
-        self = relatorio.registrar(self, '')
-        return jogar(self, maximo)    # pula o jogador (sem saldo)
-
-    #
+    self = jogador_do_turno(self, turno)
     self = mover_jogador_com_bonus(self, turno, BONUS)
     self = propriedade_na_posicao(self, turno)
     n = negocio.comprar_ou_alugar(self.j, self.p, self.registro, self.banco_)
     self = atualizar_registros(self, n.registro, n.banco_)
-    if banco.saldo_de(self.banco_, self.j.i) <= 0:
-        self = self.set('rodadas', rodada.remover(self.rodadas))
 
-    #
     self = relatorio.registrar(self, n.tipo)
-
-    #
     if rodada.resta_um(self.rodadas):
         return self
     return jogar(self, maximo)
@@ -83,9 +71,11 @@ def proxima_rodada(self):
 def jogador_do_turno(self, turno):
     j = self.tabuleiro.jogadores[turno]
     assert j.i == turno
-    self = self.set('j', j)  # .set('i', turno))
+    self = self.set('j', j)
     eliminado = banco.saldo_de(self.banco_, self.j.i) <= 0
-    return self, eliminado
+    if eliminado:
+        self = relatorio.registrar(self, '')
+    return self
 
 
 def propriedade_na_posicao(self, turno):
@@ -104,4 +94,7 @@ def mover_jogador_com_bonus(self, turno, bonus):
 
 
 def atualizar_registros(self, registro, b):
-    return self.set('registro', registro).set('banco_', b)
+    self = self.set('registro', registro).set('banco_', b)
+    if banco.saldo_de(b, self.j.i) <= 0:
+        self = self.set('rodadas', rodada.remover(self.rodadas, self.rodadas.turno))
+    return self
