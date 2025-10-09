@@ -1,7 +1,7 @@
 import random
 
 
-def impulsivo(j, p):
+def impulsivo(saldo, p):
     return True
 
 
